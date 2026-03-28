@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import { createClient } from "@/lib/supabase/server";
-import { parseMood } from "@/lib/entry-mood";
+import { MOODS, parseMood } from "@/lib/entry-mood";
 import type { Mood } from "@/types/entry";
 
 const moodConfig: Record<Mood, { emoji: string; label: string }> = {
@@ -13,13 +13,56 @@ const moodConfig: Record<Mood, { emoji: string; label: string }> = {
 };
 
 type PageProps = {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{
+    q?: string | string[];
+    mood?: string | string[];
+    date_from?: string | string[];
+    date_to?: string | string[];
+  }>;
 };
 
-function normalizeSearchQuery(raw: string | string[] | undefined): string {
+function firstParam(raw: string | string[] | undefined): string {
   if (raw === undefined) return "";
-  const s = Array.isArray(raw) ? (raw[0] ?? "") : raw;
-  return s.trim();
+  return (Array.isArray(raw) ? (raw[0] ?? "") : raw).trim();
+}
+
+function normalizeSearchQuery(raw: string | string[] | undefined): string {
+  return firstParam(raw);
+}
+
+function parseMoodFilter(
+  raw: string | string[] | undefined,
+): Mood | null {
+  const s = firstParam(raw);
+  if (!s) return null;
+  return MOODS.includes(s as Mood) ? (s as Mood) : null;
+}
+
+/** `YYYY-MM-DD` only; invalid → null */
+function parseDateParam(
+  raw: string | string[] | undefined,
+): string | null {
+  const s = firstParam(raw);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if (
+    dt.getUTCFullYear() !== y ||
+    dt.getUTCMonth() !== m - 1 ||
+    dt.getUTCDate() !== d
+  ) {
+    return null;
+  }
+  return s;
+}
+
+/** Inclusive calendar day in Korea (Asia/Seoul) for `timestamptz` comparison */
+function startOfKstDayIso(dateYmd: string): string {
+  return `${dateYmd}T00:00:00+09:00`;
+}
+
+function endOfKstDayIso(dateYmd: string): string {
+  return `${dateYmd}T23:59:59.999+09:00`;
 }
 
 /** Escape `%`, `_`, and `\` for PostgreSQL ILIKE patterns. */
@@ -42,6 +85,18 @@ function formatDate(dateString: string) {
 export default async function DiaryListPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const searchQuery = normalizeSearchQuery(params.q);
+  const moodFilter = parseMoodFilter(params.mood);
+  let dateFrom = parseDateParam(params.date_from);
+  let dateTo = parseDateParam(params.date_to);
+  if (dateFrom && dateTo && dateFrom > dateTo) {
+    [dateFrom, dateTo] = [dateTo, dateFrom];
+  }
+
+  const hasActiveFilters =
+    Boolean(searchQuery) ||
+    moodFilter !== null ||
+    dateFrom !== null ||
+    dateTo !== null;
 
   const supabase = await createClient();
   let listQuery = supabase
@@ -52,6 +107,15 @@ export default async function DiaryListPage({ searchParams }: PageProps) {
   if (searchQuery) {
     const pattern = `%${escapeIlikePattern(searchQuery)}%`;
     listQuery = listQuery.ilike("title", pattern);
+  }
+  if (moodFilter) {
+    listQuery = listQuery.eq("mood", moodFilter);
+  }
+  if (dateFrom) {
+    listQuery = listQuery.gte("created_at", startOfKstDayIso(dateFrom));
+  }
+  if (dateTo) {
+    listQuery = listQuery.lte("created_at", endOfKstDayIso(dateTo));
   }
 
   const { data: rows, error } = await listQuery;
@@ -102,47 +166,102 @@ export default async function DiaryListPage({ searchParams }: PageProps) {
           <form
             method="get"
             action="/diary"
-            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+            className="flex flex-col gap-3"
           >
-            <label htmlFor="diary-search-q" className="sr-only">
-              제목 검색
-            </label>
-            <input
-              id="diary-search-q"
-              name="q"
-              type="search"
-              placeholder="제목으로 검색"
-              defaultValue={searchQuery}
-              className="min-h-11 w-full min-w-0 flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm outline-none ring-slate-900/0 transition-[box-shadow,border-color] placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10"
-            />
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-800 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-700"
-              >
-                검색
-              </button>
-              {searchQuery ? (
-                <Link
-                  href="/diary"
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <label htmlFor="diary-search-q" className="sr-only">
+                제목 검색
+              </label>
+              <input
+                id="diary-search-q"
+                name="q"
+                type="search"
+                placeholder="제목으로 검색"
+                defaultValue={searchQuery}
+                className="min-h-11 w-full min-w-0 flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm outline-none ring-slate-900/0 transition-[box-shadow,border-color] placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10"
+              />
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-800 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-700"
                 >
-                  초기화
-                </Link>
-              ) : null}
+                  검색
+                </button>
+                {hasActiveFilters ? (
+                  <Link
+                    href="/diary"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    초기화
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-[200px]">
+                <label
+                  htmlFor="diary-filter-mood"
+                  className="text-xs font-medium text-slate-600"
+                >
+                  기분
+                </label>
+                <select
+                  id="diary-filter-mood"
+                  name="mood"
+                  defaultValue={moodFilter ?? ""}
+                  className="min-h-11 w-full rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm outline-none ring-slate-900/0 transition-[box-shadow,border-color] focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10"
+                >
+                  <option value="">전체</option>
+                  {MOODS.map((m) => (
+                    <option key={m} value={m}>
+                      {moodConfig[m].label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-[180px]">
+                <label
+                  htmlFor="diary-filter-date-from"
+                  className="text-xs font-medium text-slate-600"
+                >
+                  시작일
+                </label>
+                <input
+                  id="diary-filter-date-from"
+                  name="date_from"
+                  type="date"
+                  defaultValue={dateFrom ?? ""}
+                  className="min-h-11 w-full rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm outline-none ring-slate-900/0 transition-[box-shadow,border-color] focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10"
+                />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-[180px]">
+                <label
+                  htmlFor="diary-filter-date-to"
+                  className="text-xs font-medium text-slate-600"
+                >
+                  종료일
+                </label>
+                <input
+                  id="diary-filter-date-to"
+                  name="date_to"
+                  type="date"
+                  defaultValue={dateTo ?? ""}
+                  className="min-h-11 w-full rounded-full border border-slate-200/80 bg-white px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm outline-none ring-slate-900/0 transition-[box-shadow,border-color] focus:border-slate-300 focus:ring-2 focus:ring-slate-900/10"
+                />
+              </div>
             </div>
           </form>
         </div>
 
         {entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-slate-200/80 bg-white py-20 text-center shadow-sm">
-            {searchQuery ? (
+            {hasActiveFilters ? (
               <>
                 <p className="text-xl font-bold text-slate-600">
                   검색 결과가 없습니다
                 </p>
                 <p className="mt-2 text-sm font-normal leading-relaxed text-slate-500">
-                  다른 검색어로 다시 시도해 보세요.
+                  조건을 바꿔 다시 시도해 보세요.
                 </p>
                 <Link
                   href="/diary"
