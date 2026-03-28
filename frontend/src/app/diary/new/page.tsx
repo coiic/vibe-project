@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import { createClient } from "@/lib/supabase/client";
 import type { Mood } from "@/types/entry";
 
 const moodOptions: { value: Mood; emoji: string; label: string }[] = [
@@ -25,6 +26,8 @@ export default function DiaryNewPage() {
     content?: string;
     mood?: string;
   }>({});
+  const [submitError, setSubmitError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const validate = () => {
     const next: typeof errors = {};
@@ -35,10 +38,37 @@ export default function DiaryNewPage() {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    router.push("/diary");
+    setSubmitError("");
+    setSaving(true);
+
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("entries")
+      .insert({
+        title: title.trim(),
+        content: content.trim(),
+        mood: mood!,
+      })
+      .select()
+      .single();
+
+    setSaving(false);
+
+    if (error) {
+      setSubmitError(error.message);
+      return;
+    }
+
+    if (!data?.id) {
+      setSubmitError("일기를 저장했지만 상세 정보를 불러올 수 없습니다.");
+      return;
+    }
+
+    router.refresh();
+    router.push(`/diary/${data.id}`);
   };
 
   return (
@@ -71,6 +101,15 @@ export default function DiaryNewPage() {
           onSubmit={handleSubmit}
           className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8"
         >
+          {submitError && (
+            <p
+              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+              role="alert"
+            >
+              {submitError}
+            </p>
+          )}
+
           <div>
             <label
               htmlFor="title"
@@ -164,9 +203,10 @@ export default function DiaryNewPage() {
             </Link>
             <button
               type="submit"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+              disabled={saving}
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              저장
+              {saving ? "저장 중…" : "저장"}
             </button>
           </div>
         </form>

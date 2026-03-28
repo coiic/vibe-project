@@ -31,13 +31,13 @@ todos:
     status: completed
   - id: phase2-auth
     content: "[2-I] 인증 연동 — signUp/signIn/signOut 실제 호출로 교체"
-    status: pending
+    status: completed
   - id: phase2-crud
     content: "[2-J] CRUD 연동 — mockData를 Supabase entries 쿼리로 교체"
-    status: pending
+    status: completed
   - id: phase2-cleanup
     content: "[2-K] 정리 — mockData 삭제, import 정리, 빌드 확인"
-    status: pending
+    status: completed
 isProject: true
 ---
 

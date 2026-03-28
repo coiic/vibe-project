@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { mockEntries } from "@/lib/mockData";
 import Header from "@/components/Header";
+import { createClient } from "@/lib/supabase/server";
+import { parseMood } from "@/lib/entry-mood";
 import type { Mood } from "@/types/entry";
 
 const moodConfig: Record<Mood, { emoji: string; label: string }> = {
@@ -20,11 +21,36 @@ function formatDate(dateString: string) {
   });
 }
 
-export default function DiaryListPage() {
-  const entries = [...mockEntries].sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+export default async function DiaryListPage() {
+  const supabase = await createClient();
+  const { data: rows, error } = await supabase
+    .from("entries")
+    .select("id, title, mood, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center">
+            <p className="text-lg font-medium text-red-800">
+              일기 목록을 불러오지 못했습니다
+            </p>
+            <p className="mt-2 text-sm text-red-600">{error.message}</p>
+            <Link
+              href="/diary"
+              className="mt-6 inline-block rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+            >
+              다시 시도
+            </Link>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  const entries = rows ?? [];
 
   return (
     <>
@@ -58,7 +84,7 @@ export default function DiaryListPage() {
         ) : (
           <ul className="space-y-3">
             {entries.map((entry) => {
-              const mood = moodConfig[entry.mood];
+              const mood = moodConfig[parseMood(entry.mood)];
               return (
                 <li key={entry.id}>
                   <Link

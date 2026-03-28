@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,8 +11,9 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -22,6 +24,19 @@ export default function SignupPage() {
 
     if (password.length < 6) {
       setError("비밀번호는 6자 이상이어야 합니다.");
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
       return;
     }
 
@@ -101,9 +116,10 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
+            disabled={loading}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            회원가입
+            {loading ? "가입 중…" : "회원가입"}
           </button>
         </form>
 

@@ -1,10 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { mockEntries } from "@/lib/mockData";
+import { notFound } from "next/navigation";
 import Header from "@/components/Header";
-import type { Mood } from "@/types/entry";
+import DiaryDeleteButton from "@/components/DiaryDeleteButton";
+import { createClient } from "@/lib/supabase/server";
+import { parseMood } from "@/lib/entry-mood";
+import type { Entry, Mood } from "@/types/entry";
 
 const moodConfig: Record<Mood, { emoji: string; label: string }> = {
   happy: { emoji: "😊", label: "행복" },
@@ -34,45 +34,27 @@ function formatDateTime(dateString: string) {
   });
 }
 
-export default function DiaryDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params.id as string;
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
-  const entry = mockEntries.find((e) => e.id === id);
+export default async function DiaryDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const supabase = await createClient();
 
-  if (!entry) {
-    return (
-      <>
-        <Header />
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 py-20 text-center">
-            <p className="text-lg font-medium text-zinc-500">
-              일기를 찾을 수 없습니다
-            </p>
-            <p className="mt-1 text-sm text-zinc-400">
-              존재하지 않거나 삭제된 일기입니다.
-            </p>
-            <Link
-              href="/diary"
-              className="mt-6 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
-            >
-              목록으로 돌아가기
-            </Link>
-          </div>
-        </main>
-      </>
-    );
+  const { data: row, error } = await supabase
+    .from("entries")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !row) {
+    notFound();
   }
 
-  const mood = moodConfig[entry.mood];
+  const entry = row as Entry;
+  const mood = moodConfig[parseMood(entry.mood)];
   const isEdited = entry.updated_at !== entry.created_at;
-
-  const handleDelete = () => {
-    if (confirm("정말로 이 일기를 삭제하시겠습니까?")) {
-      router.push("/diary");
-    }
-  };
 
   return (
     <>
@@ -135,12 +117,7 @@ export default function DiaryDetailPage() {
           >
             수정
           </Link>
-          <button
-            onClick={handleDelete}
-            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-          >
-            삭제
-          </button>
+          <DiaryDeleteButton entryId={entry.id} />
         </div>
       </main>
     </>
