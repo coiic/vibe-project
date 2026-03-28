@@ -1,0 +1,24 @@
+---
+description: Next.js App Router — 라우트·레이아웃·메타데이터·API·서버 액션
+globs: app/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next.js App Router
+
+## 구조
+
+- 라우팅·레이아웃·페이지는 **`app/`** 아래에 둔다. **`pages/`** 는 사용하지 않는다.
+- `app/**/route.ts` 등 **Route Handler**로 HTTP API를 처리할 수 있다.
+
+## 컴포넌트
+
+- `.tsx` 컴포넌트의 서버/클라이언트 구분·페칭 위치는 **`react-components.mdc`** 규칙과 같다.
+
+## 데이터
+
+- 앱 라우트·핸들러 기준: 데이터 페칭은 가능하면 **서버 컴포넌트**에서 하거나, **Route Handler**(`app/api/.../route.ts`)·**Server Actions**로 처리한다.
+
+## SEO·메타
+
+- 메타데이터·SEO는 App Router 방식을 따른다. (`metadata` export, `generateMetadata` 등)

@@ -1,0 +1,28 @@
+---
+description: 공통 작업 범위·네이밍·금지 사항(AGENTS.md와 정합)
+alwaysApply: true
+---
+
+# 공통 프로젝트 규칙
+
+## 스택 요약
+
+- Next.js App Router(`app/`), TypeScript, Tailwind CSS, Supabase.
+
+## 반드시 지킬 것
+
+- **요청 범위**: 사용자가 요청한 범위 안에서만 수정한다. 불필요한 대규모 리팩터링·무관한 파일 변경을 하지 않는다.
+- **관례**: 프로젝트에 이미 있는 import·폴더 구조·네이밍을 우선 따른다.
+
+## 하지 말 것
+
+- **Pages Router**로 새 기능을 만들지 않는다. (`pages/`, `getServerSideProps`, `getStaticProps` 등)
+- **JavaScript만**으로 새 모듈·페이지·API를 추가하지 않는다. (`.ts` / `.tsx` 사용)
+- **CSS Modules·styled-components·emotion** 등 새 CSS-in-JS 스택을 도입하지 않는다. (명시 요청 전까지 Tailwind만)
+- **DB 스택 기본값**을 Prisma 직접 연결, Firebase, MongoDB 전용 클라이언트 등으로 바꾸지 않는다.
+- **환경 변수·시크릿**을 하드코딩하거나 클라이언트에 서버 전용 키를 넣지 않는다.
+- **불필요한 의존성**을 사용자 요청 없이 추가하지 않는다.
+
+## 참고
+
+- 공식 문서와 충돌 시 **AGENTS.md의 스택 선택**을 우선하고, 최신 공식 권장 패턴을 따른다.
