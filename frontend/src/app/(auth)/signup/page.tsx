@@ -44,12 +44,12 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-center text-2xl font-bold text-zinc-900">
+    <div className="flex flex-1 flex-col items-center justify-center px-2 py-10 sm:py-14">
+      <div className="w-full max-w-sm rounded-[2rem] border border-slate-100/50 bg-white px-8 py-10 shadow-sm sm:px-10 sm:py-12">
+        <h1 className="text-center text-3xl font-semibold tracking-tight text-[#1a1d23]">
           회원가입
         </h1>
-        <p className="mt-2 text-center text-sm text-zinc-500">
+        <p className="mt-2 text-center text-sm font-normal leading-relaxed text-slate-500">
           새 계정을 만들어 일기를 시작하세요
         </p>
 
@@ -57,7 +57,7 @@ export default function SignupPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-slate-700"
             >
               이메일
             </label>
@@ -68,14 +68,14 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+              className="mt-2 block w-full rounded-full border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/15"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-slate-700"
             >
               비밀번호
             </label>
@@ -86,14 +86,14 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="6자 이상 입력"
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+              className="mt-2 block w-full rounded-full border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/15"
             />
           </div>
 
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-slate-700"
             >
               비밀번호 확인
             </label>
@@ -104,12 +104,12 @@ export default function SignupPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="비밀번호를 다시 입력"
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+              className="mt-2 block w-full rounded-full border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-[#1a1d23] shadow-sm placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/15"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+            <p className="rounded-2xl border border-red-100 bg-red-50/80 px-4 py-2.5 text-sm text-red-600">
               {error}
             </p>
           )}
@@ -117,17 +117,17 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500/25 focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "가입 중…" : "회원가입"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-8 text-center text-sm text-slate-500">
           이미 계정이 있으신가요?{" "}
           <Link
             href="/login"
-            className="font-semibold text-zinc-900 hover:underline"
+            className="font-semibold text-orange-600 hover:underline"
           >
             로그인
           </Link>

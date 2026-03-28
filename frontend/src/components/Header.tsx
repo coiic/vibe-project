@@ -27,9 +27,12 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-zinc-200 bg-white">
-      <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
-        <Link href="/diary" className="text-xl font-bold text-zinc-900">
+    <header className="mb-4 border-0 bg-transparent sm:mb-6">
+      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between rounded-full border border-slate-100/80 bg-white px-5 shadow-sm sm:h-16 sm:px-7">
+        <Link
+          href="/diary"
+          className="text-xl font-bold tracking-tight text-orange-600"
+        >
           나만의 일기장
         </Link>
         <div className="flex flex-col items-end gap-1">
@@ -40,7 +43,7 @@ export default function Header() {
           type="button"
           onClick={handleLogout}
           disabled={loading}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "로그아웃 중…" : "로그아웃"}
         </button>

@@ -74,10 +74,10 @@ export default function DiaryNewPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-4xl flex-1 rounded-[2rem] border border-slate-100/50 bg-[#f2f4f7] px-5 py-8 shadow-sm sm:px-8 sm:py-10">
         <Link
           href="/diary"
-          className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900"
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-orange-600"
         >
           <svg
             className="h-4 w-4"
@@ -95,15 +95,17 @@ export default function DiaryNewPage() {
           목록으로
         </Link>
 
-        <h1 className="mb-6 text-2xl font-bold text-zinc-900">새 일기 쓰기</h1>
+        <h1 className="mb-6 text-3xl font-semibold tracking-tight text-[#1a1d23]">
+          새 일기 쓰기
+        </h1>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8"
+          className="space-y-8 rounded-[1.75rem] border border-slate-100/50 bg-white p-6 shadow-sm sm:p-8"
         >
           {submitError && (
             <p
-              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+              className="rounded-2xl border border-red-100 bg-red-50/80 px-4 py-2.5 text-sm text-red-600"
               role="alert"
             >
               {submitError}
@@ -113,7 +115,7 @@ export default function DiaryNewPage() {
           <div>
             <label
               htmlFor="title"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-slate-700"
             >
               제목
             </label>
@@ -126,10 +128,10 @@ export default function DiaryNewPage() {
                 if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
               }}
               placeholder="오늘의 일기 제목"
-              className={`w-full rounded-lg border px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:ring-2 focus:ring-zinc-900/10 ${
+              className={`w-full rounded-2xl border bg-slate-50/30 px-4 py-3 text-sm text-[#1a1d23] placeholder-slate-400 outline-none transition-colors focus:bg-white focus:ring-2 focus:ring-orange-500/15 ${
                 errors.title
                   ? "border-red-400 focus:border-red-500"
-                  : "border-zinc-200 focus:border-zinc-400"
+                  : "border-slate-200 focus:border-orange-400"
               }`}
             />
             {errors.title && (
@@ -138,7 +140,7 @@ export default function DiaryNewPage() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-700">
+            <label className="mb-2 block text-sm font-medium text-slate-700">
               기분
             </label>
             <div className="flex flex-wrap gap-2">
@@ -152,8 +154,8 @@ export default function DiaryNewPage() {
                   }}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     mood === option.value
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
+                      ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   <span className="text-base">{option.emoji}</span>
@@ -169,7 +171,7 @@ export default function DiaryNewPage() {
           <div>
             <label
               htmlFor="content"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-2 block text-sm font-medium text-slate-700"
             >
               내용
             </label>
@@ -183,10 +185,10 @@ export default function DiaryNewPage() {
               }}
               placeholder="오늘 하루는 어땠나요?"
               rows={8}
-              className={`w-full resize-none rounded-lg border px-4 py-2.5 text-sm leading-relaxed text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:ring-2 focus:ring-zinc-900/10 ${
+              className={`w-full resize-none rounded-2xl border bg-slate-50/30 px-4 py-3 text-sm font-normal leading-relaxed text-[#1a1d23] placeholder-slate-400 outline-none transition-colors focus:bg-white focus:ring-2 focus:ring-orange-500/15 ${
                 errors.content
                   ? "border-red-400 focus:border-red-500"
-                  : "border-zinc-200 focus:border-zinc-400"
+                  : "border-slate-200 focus:border-orange-400"
               }`}
             />
             {errors.content && (
@@ -194,17 +196,17 @@ export default function DiaryNewPage() {
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-6">
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-8">
             <Link
               href="/diary"
-              className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+              className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
             >
               취소
             </Link>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? "저장 중…" : "저장"}
             </button>

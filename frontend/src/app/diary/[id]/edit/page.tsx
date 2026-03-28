@@ -29,7 +29,7 @@ export default async function DiaryEditPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-4xl flex-1 rounded-[2rem] border border-slate-100/50 bg-[#f2f4f7] px-5 py-8 shadow-sm sm:px-8 sm:py-10">
         <DiaryEditForm
           entryId={entry.id}
           initialTitle={entry.title}
